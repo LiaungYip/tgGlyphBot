@@ -17,10 +17,11 @@ Or you can add it to your chat, and use it like this:
 
 <b>Troubleshooting</b>
 
+This is <b>beta software</b>. If the bot isn't responding, it's probably crashed. Message @liaungyip and complain!
+
 ► The glyph names must be spelled exactly like in the scanner / Glyphtionary.
     ✓ <code>Portal</code>
     ✗ <code>Portals</code> (Extra <code>s</code>)
-
 
 ► The glyph names must be separated using commas - not spaces, semicolons, dashes, or anything else.
     ✓ <code>Help, Enlightened, Capture, All, Portal</code>

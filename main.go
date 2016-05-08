@@ -18,6 +18,8 @@ func main() {
 	defer os.RemoveAll(tempdir)
 
 	for u := range updates {
+		m := u.Message
+		log.Printf("User: %s %s (@%s), Text: %s", m.From.FirstName, m.From.LastName, m.From.UserName, m.Text)
 		handleUpdate(bot, u, db, tempdir)
 	}
 }
@@ -48,7 +50,7 @@ func handleUpdate(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir 
 		return
 	}
 
-	log.Printf("User: %s %s (@%s), Text: %s", m.From.FirstName, m.From.LastName, m.From.UserName, m.Text)
+	//log.Printf("User: %s %s (@%s), Text: %s", m.From.FirstName, m.From.LastName, m.From.UserName, m.Text)
 
 	fileID := checkCache(glyphNames, db)
 	if fileID == nil {
