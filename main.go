@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/LiaungYip/tgGlyphBot/input"
 	"github.com/boltdb/bolt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"os"
@@ -10,6 +11,8 @@ import (
 )
 
 func main() {
+	defer LogSetupAndDestruct()()
+
 	bot, updates := initTelegram()
 	db := initDatabase(databaseFilename)
 	defer db.Close()
@@ -20,6 +23,7 @@ func main() {
 	for u := range updates {
 		m := u.Message
 		log.Printf("User: %s %s (@%s), Text: %s", m.From.FirstName, m.From.LastName, m.From.UserName, m.Text)
+		log.Println(spew.Sdump(u))
 		handleUpdate(bot, u, db, tempdir)
 	}
 }
@@ -32,16 +36,17 @@ func handleUpdate(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir 
 	}
 
 	if strings.HasPrefix(t, "/help") || strings.HasPrefix(t, "/start") {
+		log.Println("Sent help message!")
 		sendHelp(bot, u)
 		return
 	}
 
 	if strings.HasPrefix(t, "/glyphs@IngressGlyphBot") {
 		t = t[len("/glyphs@IngressGlyphBot"):]
-		print(t)
+		log.Println("Stripped /glyphs@IngressGlyphBot!")
 	} else if strings.HasPrefix(t, "/glyphs") {
 		t = t[len("/glyphs"):]
-		print(t)
+		log.Println("Stripped /glyphs!")
 	}
 
 	glyphNames, _, err := input.ProcessString(t)
