@@ -30,6 +30,7 @@ func handleUpdate(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir 
 	glyphNames, _, err := input.ProcessString(t)
 
 	if err != nil {
+		log.Printf("ERROR: User: %s %s (@%s), Text: %s, Error: %s", m.From.FirstName, m.From.LastName, m.From.UserName, m.Text, err.Error())
 		msg := tgbotapi.NewMessage(u.Message.Chat.ID, err.Error())
 		bot.Send(msg)
 		return
@@ -51,7 +52,7 @@ func handleUpdate(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir 
 		response, _ := bot.Send(msg)
 		//spew.Dump(response)
 		fileID := response.Sticker.FileID
-		log.Printf("Added to cache: %s -> %s", glyphNames, fileID)
+		log.Printf("Added to cache: %s -> %s. File size: %d", glyphNames, fileID, response.Sticker.FileSize)
 		addToCache(glyphNames, fileID, db)
 	} else {
 		log.Printf("Hitting cache! %s -> %s", glyphNames, fileID)
