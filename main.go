@@ -6,6 +6,7 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -23,19 +24,29 @@ func main() {
 
 func handleUpdate(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir string) {
 	m := u.Message
+	t := m.Text
 	if m.Text == "" { // No action if text field is blank. (i.e. if user sends photos or stickers or voice or something weird.)
 		return
 	}
 
-	glyphNames, _, err := input.ProcessString(m.Text)
+	if strings.HasPrefix(t, "/help") || strings.HasPrefix(t, "/start") {
+		sendHelp(bot, u)
+		return
+	}
+
+	if strings.HasPrefix(t, "/glyphs@IngressGlyphBot") {
+		t = t[len("/glyphs@IngressGlyphBot"):]
+		print(t)
+	} else if strings.HasPrefix(t, "/glyphs") {
+		t = t[len("/glyphs"):]
+		print(t)
+	}
+
+	glyphNames, _, err := input.ProcessString(t)
 	if err != nil {
 		sendError(bot, u, err)
 		return
 	}
-
-	//reply_text := fmt.Sprint(glyphNames, edgeLists)
-	//msg := tgbotapi.NewMessage(u.Message.Chat.ID, reply_text)
-	//bot.Send(msg)
 
 	log.Printf("User: %s %s (@%s), Text: %s", m.From.FirstName, m.From.LastName, m.From.UserName, m.Text)
 
@@ -71,5 +82,11 @@ func sendNewSticker(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdi
 func sendFromCache(bot *tgbotapi.BotAPI, u tgbotapi.Update, glyphNames []string, fileID []byte) {
 	log.Printf("Hitting cache! %s -> %s", glyphNames, fileID)
 	msg := tgbotapi.NewStickerShare(u.Message.Chat.ID, string(fileID))
+	bot.Send(msg)
+}
+
+func sendHelp(bot *tgbotapi.BotAPI, u tgbotapi.Update) {
+	msg := tgbotapi.NewMessage(u.Message.Chat.ID, helpString)
+	msg.ParseMode = "HTML"
 	bot.Send(msg)
 }
