@@ -120,7 +120,7 @@ func ProcessString(x string) ([]string, []string, error) {
 		_, _, errs := lookupWords(words)
 		err2 := concatenateErrors(errs)
 		if err2 == nil {
-			t := "USE COMMAS, NOT " + s.name
+			t := "USE COMMAS, NOT " + s.name + ". Example: `Clear All, Open All, Discover, Truth`."
 			return nil, nil, errors.New(t)
 		}
 	}
