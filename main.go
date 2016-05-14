@@ -35,18 +35,14 @@ func handleUpdate(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir 
 		return
 	}
 
-	if strings.HasPrefix(t, "/help") || strings.HasPrefix(t, "/start") {
+	if isCommand(m, "help") || isCommand(m, "start") {
 		log.Println("Sent help message!")
 		sendHelp(bot, u)
 		return
 	}
 
-	if strings.HasPrefix(t, "/glyphs@IngressGlyphBot") {
-		t = t[len("/glyphs@IngressGlyphBot"):]
-		log.Println("Stripped /glyphs@IngressGlyphBot!")
-	} else if strings.HasPrefix(t, "/glyphs") {
-		t = t[len("/glyphs"):]
-		log.Println("Stripped /glyphs!")
+	if isCommand(m, "glyph") || isCommand(m, "glyphs") {
+		t = m.CommandArguments()
 	}
 
 	glyphNames, _, err := input.ProcessString(t)
@@ -62,6 +58,14 @@ func handleUpdate(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir 
 		sendNewSticker(bot, u, db, tempdir, glyphNames)
 	} else {
 		sendFromCache(bot, u, glyphNames, fileID)
+	}
+}
+
+func isCommand (m *tgbotapi.Message, commandName string) (bool) {
+	if strings.EqualFold(commandName, m.Command()) {
+		return true
+	} else {
+		return false
 	}
 }
 
