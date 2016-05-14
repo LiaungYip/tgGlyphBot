@@ -1,23 +1,23 @@
-package main
+package cache
 
 import (
-	"testing"
-	"io/ioutil"
-	"path/filepath"
-	"os"
-	"log"
 	"bytes"
-	"github.com/boltdb/bolt"
 	"fmt"
+	"github.com/boltdb/bolt"
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
+	"testing"
 )
 
 var testDatabaseFilename = "test_db.boltdb"
 
 func tempDbSetup() (string, *bolt.DB) {
-	tmpdir, err := ioutil.TempDir("","tg_glyph_bot_test")
-	check (err)
+	tmpdir, err := ioutil.TempDir("", "tg_glyph_bot_test")
+	check(err)
 	tmpfile := filepath.Join(tmpdir, testDatabaseFilename)
-	db := initDatabase(tmpfile)
+	db := Init(tmpfile)
 	return tmpfile, db
 }
 
@@ -27,28 +27,28 @@ func tempDbTeardown(tempFile string) {
 	os.RemoveAll(d)
 }
 
-func TestNonexistent(t *testing.T){
+func TestNonexistent(t *testing.T) {
 	dbName, db := tempDbSetup()
 	defer db.Close()
 	defer tempDbTeardown(dbName)
 
-	result := checkCache([]string{"Doesn't Exist"}, db)
+	result := Check([]string{"Doesn't Exist"}, db)
 	if result != nil {
 		t.Fail()
 	}
 }
 
-func TestSimple(t *testing.T){
+func TestSimple(t *testing.T) {
 	dbName, db := tempDbSetup()
 	defer db.Close()
 	defer tempDbTeardown(dbName)
 
-	g := []string{"Open All","Clear All","Discover","Truth"}
+	g := []string{"Open All", "Clear All", "Discover", "Truth"}
 	fileID := "AgADBQADtacxG3wqnwr9PWHBQNUPuTvYvTIABF_lBI7oY8NyeRYBAAEC"
 
-	addToCache(g, fileID, db)
+	Add(g, fileID, db)
 
-	result := checkCache(g, db)
+	result := Check(g, db)
 	fmt.Printf("%s -> %s", g, result)
 	if bytes.Compare(result, []byte(fileID)) != 0 {
 		t.Fail()

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/LiaungYip/tgGlyphBot/cache"
+	"github.com/LiaungYip/tgGlyphBot/config"
 	"github.com/LiaungYip/tgGlyphBot/input"
 	"github.com/boltdb/bolt"
 	"github.com/davecgh/go-spew/spew"
@@ -14,7 +16,7 @@ func main() {
 	defer LogSetupAndDestruct()()
 
 	bot, updates := initTelegram()
-	db := initDatabase(databaseFilename)
+	db := cache.Init(config.DatabaseFilename)
 	defer db.Close()
 
 	tempdir := tempImageDir()
@@ -62,7 +64,6 @@ func glyphsCommand(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir
 		t = u.Message.CommandArguments()
 	}
 
-
 	glyphNames, _, err := input.ProcessString(t)
 	if err != nil {
 		sendError(bot, u, err)
@@ -71,7 +72,7 @@ func glyphsCommand(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir
 
 	//log.Printf("User: %s %s (@%s), Text: %s", m.From.FirstName, m.From.LastName, m.From.UserName, m.Text)
 
-	fileID := checkCache(glyphNames, db)
+	fileID := cache.Check(glyphNames, db)
 	if fileID == nil {
 		sendNewSticker(bot, u, db, tempdir, glyphNames)
 	} else {
@@ -96,7 +97,7 @@ func sendNewSticker(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdi
 	response, _ := bot.Send(msg)
 
 	fileID := response.Sticker.FileID
-	addToCache(glyphNames, fileID, db)
+	cache.Add(glyphNames, fileID, db)
 	log.Printf("Added to cache: %s -> %s. File size: %d", glyphNames, fileID, response.Sticker.FileSize)
 }
 

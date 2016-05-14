@@ -1,16 +1,23 @@
-package main
+package cache
 
 import (
 	"fmt"
+	"github.com/LiaungYip/tgGlyphBot/config"
 	"github.com/boltdb/bolt"
 	"log"
 	"strings"
 )
 
+func check(e error) {
+	if e != nil {
+		log.Panic(e)
+	}
+}
+
 var stickerBucket = []byte("stickers")
 
 // Always follow with `defer db.Close()`.
-func initDatabase(dbFilename string) *bolt.DB {
+func Init(dbFilename string) *bolt.DB {
 	log.Print("Opening database for caching: ", dbFilename)
 	db, err := bolt.Open(dbFilename, 0600, nil)
 	check(err)
@@ -26,13 +33,13 @@ func initDatabase(dbFilename string) *bolt.DB {
 	return db
 }
 
-func keyFromGlyphsList (glyphsList []string) []byte {
-	key := "ver:" + programVersion + "|glyphs:" + strings.Join(glyphsList, ",")
+func keyFromGlyphsList(glyphsList []string) []byte {
+	key := "ver:" + config.ProgramVersion + "|glyphs:" + strings.Join(glyphsList, ",")
 	return []byte(key)
 }
 
 // Check the cache for an image already generated.
-func checkCache(glyphsList []string, db *bolt.DB) []byte {
+func Check(glyphsList []string, db *bolt.DB) []byte {
 	key := keyFromGlyphsList(glyphsList)
 	var v []byte
 
@@ -46,7 +53,7 @@ func checkCache(glyphsList []string, db *bolt.DB) []byte {
 	return v
 }
 
-func addToCache(glyphsList []string, fileID string, db *bolt.DB) {
+func Add(glyphsList []string, fileID string, db *bolt.DB) {
 	key := keyFromGlyphsList(glyphsList)
 	id := []byte(fileID)
 
@@ -55,10 +62,10 @@ func addToCache(glyphsList []string, fileID string, db *bolt.DB) {
 		e := b.Put(key, id)
 		return e
 	})
-	check (err)
+	check(err)
 }
 
-func dumpCache(db *bolt.DB) {
+func Dump(db *bolt.DB) {
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(stickerBucket)
 		c := b.Cursor()
