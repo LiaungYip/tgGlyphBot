@@ -1,6 +1,5 @@
 package main
 
-
 var helpString = `<b>Ingress Glyph Bot</b>
 
 This bot makes stickers of Ingress glyphs and glyph sequences.
