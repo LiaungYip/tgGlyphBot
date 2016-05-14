@@ -24,7 +24,7 @@ var badInputs = []struct {
 	{"1,2,3,4,5,6,7,8,9,10", "TOO MANY GLYPHS"},
 	{"xm,xm,xm,xm,xm,xm,xm,xm,xm,xm", "TOO MANY GLYPHS"},
 	{"This string is 201 characters long. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped over the lazy dog. The quick brown fox jumped.", "INPUT TOO LONG"},
-	{",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,", "TOO MANY GLYPHS"},
+	{",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,", "BLANK GLYPH NAME"},
 	{"你好, 世界", "UNKNOWN GLYPH NAME"},         // Test Unicode handling. Hello, world! / Nǐ hǎo, shìjiè!
 	{"Nǐ hǎo, shìjiè", "UNKNOWN GLYPH NAME"}, //Hello, world! / Nǐ hǎo, shìjiè!
 	{"你好", "UNKNOWN GLYPH NAME"},             // Hello!
@@ -43,7 +43,7 @@ func TestBadInputs(t *testing.T) {
 			//t.Logf("Bad input successfully rejected because %s: `%s`", tt.errorType, tt.in)
 			continue
 		}
-		t.Errorf("Bad input rejected with wrong error type! Got error %s. Expected error %s for input `%s`.", err.Error(), tt.errorType, tt.in)
+		t.Errorf("Bad input rejected with wrong error type! Input was `%s`. Got error %s. Expected error %s for input `%s`.", tt.in, err.Error(), tt.errorType, tt.in)
 	}
 }
 
@@ -150,20 +150,20 @@ func TestMarginalInputs(t *testing.T) {
 	}
 }
 
-var futureInputs = []struct {
+var spellcheckInputs = []struct {
 	in        string
 	errorType string
 }{
 	{
 		"PORTALS",
-		"UNKNOWN GLYPH NAME: Did you mean Portal?",
+		"UNKNOWN GLYPH NAME: PORTALS. Did you mean Portal?",
 	},
 }
 
 // Expect this to fail until Levenshtein distance corrections are implemented.
 // The program should suggest the closest spelling to you.
-func TestFutureInputs(t *testing.T) {
-	for _, tt := range futureInputs {
+func TestSpellcheck(t *testing.T) {
+	for _, tt := range spellcheckInputs {
 		_, _, err := ProcessString(tt.in)
 		if err == nil {
 			t.Error("Failed to reject input", tt.in, "Expected error", tt.errorType)

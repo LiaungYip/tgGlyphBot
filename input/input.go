@@ -33,9 +33,12 @@ func splitWords(xptr *string, sep string) ([]string, error) {
 	words := strings.Split(*xptr, sep)
 	numWords := len(words)
 	for n, w := range words {
-		words[n] = strings.TrimSpace(w)
+		trimmed := strings.TrimSpace(w)
+		if trimmed == "" {
+			return nil, errors.New("BLANK GLYPH NAME: Did you have too many commas?")
+		}
+		words[n] = trimmed
 	}
-
 	if numWords > 9 {
 		s := fmt.Sprintf("TOO MANY GLYPHS: You can have a maximum of 9 glyphs. (You sent %d glyphs.)", len(words))
 		return nil, errors.New(s)
@@ -124,5 +127,14 @@ func ProcessString(x string) ([]string, []string, error) {
 			return nil, nil, errors.New(t)
 		}
 	}
+
+	for _, w := range words {
+		candidate := glyphs.Spellcheck(w)
+		if candidate != "" && !strings.EqualFold(candidate, w) {
+			t := fmt.Sprintf("UNKNOWN GLYPH NAME: %s. Did you mean %s?", w, candidate)
+			return nil, nil, errors.New(t)
+		}
+	}
+
 	return nil, nil, err
 }
