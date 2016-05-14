@@ -30,7 +30,6 @@ func main() {
 
 func handleUpdate(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir string) {
 	m := u.Message
-	t := m.Text
 	if m.Text == "" { // No action if text field is blank. (i.e. if user sends photos or stickers or voice or something weird.)
 		return
 	}
@@ -41,9 +40,28 @@ func handleUpdate(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir 
 		return
 	}
 
-	if isCommand(m, "glyph") || isCommand(m, "glyphs") {
-		t = m.CommandArguments()
+	if isCommand(m, "glyph") || isCommand(m, "glyphs") || m.Chat.IsPrivate() && isCommand(m, "") {
+		glyphsCommand(bot, u, db, tempdir)
+		return
 	}
+}
+
+func isCommand(m *tgbotapi.Message, commandName string) bool {
+	if strings.EqualFold(commandName, m.Command()) {
+		return true
+	} else {
+		return false
+	}
+}
+
+func glyphsCommand(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir string) {
+	var t string
+	if u.Message.Command() == "" {
+		t = u.Message.Text
+	} else {
+		t = u.Message.CommandArguments()
+	}
+
 
 	glyphNames, _, err := input.ProcessString(t)
 	if err != nil {
@@ -58,14 +76,6 @@ func handleUpdate(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir 
 		sendNewSticker(bot, u, db, tempdir, glyphNames)
 	} else {
 		sendFromCache(bot, u, glyphNames, fileID)
-	}
-}
-
-func isCommand (m *tgbotapi.Message, commandName string) (bool) {
-	if strings.EqualFold(commandName, m.Command()) {
-		return true
-	} else {
-		return false
 	}
 }
 
