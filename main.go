@@ -5,7 +5,7 @@ import (
 	"github.com/LiaungYip/tgGlyphBot/config"
 	"github.com/LiaungYip/tgGlyphBot/input"
 	"github.com/boltdb/bolt"
-	"github.com/davecgh/go-spew/spew"
+	//"github.com/davecgh/go-spew/spew"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"os"
