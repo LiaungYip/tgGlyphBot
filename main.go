@@ -23,14 +23,18 @@ func main() {
 	defer os.RemoveAll(tempdir)
 
 	for u := range updates {
+		log.Println(spew.Sdump(u))
+		if u.Message == nil {
+			continue
+		}
 		m := u.Message
 		log.Printf("User: %s %s (@%s), Text: %s", m.From.FirstName, m.From.LastName, m.From.UserName, m.Text)
-		log.Println(spew.Sdump(u))
 		handleUpdate(bot, u, db, tempdir)
 	}
 }
 
 func handleUpdate(bot *tgbotapi.BotAPI, u tgbotapi.Update, db *bolt.DB, tempdir string) {
+	log.Println("Handling update")
 	m := u.Message
 	if m.Text == "" { // No action if text field is blank. (i.e. if user sends photos or stickers or voice or something weird.)
 		return
